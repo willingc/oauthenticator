@@ -10,10 +10,9 @@ Welcome to OAuthenticator's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   README.md
    github_scope.md
    gitlab_scope.md
-   ciLogon_scope.md
+   cilogon_scope.md
    CHANGELOG.md
    CONTRIBUTING.md
 
