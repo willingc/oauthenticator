@@ -1,126 +1,57 @@
-# OAuthenticator
+# Specific Deployments for an OAuth provider
 
-OAuth + JupyterHub Authenticator = OAuthenticator
+The following sections explain additional settings and deployment instructions for provider 
+specific OAuthenticators.
 
-OAuthenticator currently supports the following authentication services:
+The following sections look at OAuthenticators for specific OAuth providers:
 
-- [Auth0](oauthenticator/auth0.py)
+- [Auth0](auth0.py)
 - [Azure](#azure-setup)
-- [Bitbucket](oauthenticator/bitbucket.py)
-- [CILogon](oauthenticator/cilogon.py)
+- [Bitbucket](bitbucket.py)
+- [CILogon](cilogon.py)
 - [GitHub](#github-setup)
 - [GitLab](#gitlab-setup)
 - [Globus](#globus-setup)
 - [Google](#google-setup)
-- [MediaWiki](oauthenticator/mediawiki.py)
+- [MediaWiki](mediawiki.py)
 - [Moodle](#moodle-setup)
 - [Okpy](#okpyauthenticator)
 - [OpenShift](#openshift-setup)
 
-A [generic implementation](oauthenticator/generic.py), which you can use with
-any provider, is also available.
-
-## Examples
-
-For an example docker image using OAuthenticator, see the [examples](examples)
-directory.
-
-[Another example](https://github.com/jupyterhub/dockerspawner/tree/master/examples/oauth)
-is using GitHub OAuth to spawn each user's server in a separate docker
-container.
-
-## Installation
-
-Install with pip:
-
-    pip3 install oauthenticator
-
-Or clone the repo and do a dev install:
-
-    git clone https://github.com/jupyterhub/oauthenticator.git
-    cd oauthenticator
-    pip3 install -e .
-
-## General setup
-
-The first step is to tell JupyterHub to use your chosen OAuthenticator. Each
-authenticator is provided in a submodule of `oauthenticator`, and each
-authenticator has a variant with `Local` (e.g. `LocalGitHubOAuthenticator`),
-which will map OAuth usernames onto local system usernames.
-
-### Set chosen OAuthenticator
-
-In `jupyterhub_config.py`, add:
-
-```python
-from oauthenticator.github import GitHubOAuthenticator
-c.JupyterHub.authenticator_class = GitHubOAuthenticator
-```
-
-### Set callback URL, client ID, and client secret
-
-All OAuthenticators require setting a callback URL, client ID, and client
-secret. You will generally get these when you register your OAuth application
-with your OAuth provider. Provider-specific details are available in sections
-below. When registering your oauth application with your provider, you will
-probably need to specify a callback URL.
-The callback URL should look like:
-
-    http[s]://[your-host]/hub/oauth_callback
-
-where `[your-host]` is where your server will be running. Such as
-`example.com:8000`.
-
-When JupyterHub runs, these values will be retrieved from the **environment variables**:
-
-```bash
-$OAUTH_CALLBACK_URL
-$OAUTH_CLIENT_ID
-$OAUTH_CLIENT_SECRET
-```
-
-You can also set these values in your **configuration file**, `jupyterhub_config.py`:
-
-```python
-# Replace MyOAuthenticator with your selected OAuthenticator class (e.g. c.GithubOAuthenticator).
-
-c.MyOAuthenticator.oauth_callback_url = 'http[s]://[your-host]/hub/oauth_callback'
-c.MyOAuthenticator.client_id = 'your-client-id'
-c.MyOAuthenticator.client_secret = 'your-client-secret'
-```
+In addition to OAuthenticators for these services, a
+[generic oauthenticator implementation](generic.py), can be used or extended to support
+any OAuth provider.
 
 ## Azure Setup
 
-
-#### _Prereqs_:
-
 * Requires: **`PyJWT>=1.5.3`**
 
-```
-> pip3 install PyJWT
+```bash
+pip3 install PyJWT
 ```
 
-* BE SURE TO SET THE **`AAD_TENANT_ID`** environment variable
+* BE SURE TO SET THE `AAD_TENANT_ID` environment variable
 
-```
-> export AAD_TENANT_ID='{AAD-TENANT-ID}'
+```bash
+export AAD_TENANT_ID='{AAD-TENANT-ID}'
 ```
 
 * Sample code is provided for you in `examples > azuread > sample_jupyter_config.py` 
 * Just add the code below to your `jupyterhub_config.py` file
 * Making sure to replace the values in `'{}'` with your APP, TENANT, DOMAIN, etc. values
 
-> ***Follow this [link to create an AAD APP](https://www.netiq.com/communities/cool-solutions/creating-application-client-id-client-secret-microsoft-azure-new-portal/)***
+Follow this [link to create an AAD APP](https://www.netiq.com/communities/cool-solutions/creating-application-client-id-client-secret-microsoft-azure-new-portal/)
 
-> CLIENT_ID === Azure `Application ID` - found in `Azure portal --> AD --> App Registrations --> App`
+```bash
+CLIENT_ID === Azure `Application ID` - found in `Azure portal --> AD --> App Registrations --> App`
 
-> TENANT_ID === Azure `Directory ID` - found in `Azure portal --> AD --> Properties`
-
+TENANT_ID === Azure `Directory ID` - found in `Azure portal --> AD --> Properties`
+```
 
 
 **jupyterhub_config.py:**
 
-```
+```python
 import os
 from oauthenticator.azuread import AzureAdOAuthenticator
 c.JupyterHub.authenticator_class = AzureAdOAuthenticator
@@ -132,16 +63,15 @@ c.AzureAdOAuthenticator.tenant_id = os.environ.get('AAD_TENANT_ID')
 c.AzureAdOAuthenticator.oauth_callback_url = 'http://{your-domain}/hub/oauth_callback'
 c.AzureAdOAuthenticator.client_id = '{AAD-APP-CLIENT-ID}'
 c.AzureAdOAuthenticator.client_secret = '{AAD-APP-CLIENT-SECRET}'
-
 ```
 
-#### _Run via_:
+#### Run via:
 
-```
+```bash
 sudo jupyterhub -f ./path/to/jupyterhub_config.py
 ```
 
-> See `run.sh` for an [example](./examples/azuread/)
+* See `run.sh` for an [example](./examples/azuread/run.sh)
 
 * [Source Code](oauthenticator/azuread.py)
 
@@ -153,8 +83,10 @@ application](https://github.com/settings/applications/new).
 
 Then, add the following to your `jupyterhub_config.py` file:
 
-    from oauthenticator.github import GitHubOAuthenticator
-    c.JupyterHub.authenticator_class = GitHubOAuthenticator
+```python
+from oauthenticator.github import GitHubOAuthenticator
+c.JupyterHub.authenticator_class = GitHubOAuthenticator
+```
 
 You can also use `LocalGitHubOAuthenticator` to map GitHub accounts onto local users.
 
@@ -173,8 +105,10 @@ application](http://docs.gitlab.com/ce/integration/oauth_provider.html).
 
 Then, add the following to your `jupyterhub_config.py` file:
 
-    from oauthenticator.gitlab import GitLabOAuthenticator
-    c.JupyterHub.authenticator_class = GitLabOAuthenticator
+```python
+from oauthenticator.gitlab import GitLabOAuthenticator
+c.JupyterHub.authenticator_class = GitLabOAuthenticator
+```
 
 You can also use `LocalGitLabOAuthenticator` to map GitLab accounts onto local users.
 
@@ -187,15 +121,19 @@ Visit https://console.developers.google.com to set up an OAuth client ID and sec
 
 Then, add the following to your `jupyterhub_config.py` file:
 
-    from oauthenticator.google import GoogleOAuthenticator
-    c.JupyterHub.authenticator_class = GoogleOAuthenticator
+```python
+from oauthenticator.google import GoogleOAuthenticator
+c.JupyterHub.authenticator_class = GoogleOAuthenticator
+```
 
 By default, any domain is allowed to login but you can restrict authorized domains with a list (recommended):
+
 ```python
 c.GoogleOAuthenticator.hosted_domain = ['mycollege.edu', 'mycompany.com']
 ```
 
 You can customize the sign in button text (optional):
+
 ```python
 c.GoogleOAuthenticator.login_service = 'My College'
 ```
@@ -220,7 +158,8 @@ The `OAUTH_CALLBACK_URL` should match `http[s]://[your-app-route]/hub/oauth_call
 
 As a cluster admin, you can create a global [OAuth client](https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#oauth-clients)
 in your OpenShift cluster creating a new OAuthClient object using the API:
-```
+
+```bash
 $ oc create -f - <<EOF
 apiVersion: v1
 kind: OAuthClient
@@ -238,7 +177,8 @@ As a project member, you can use the [Service Accounts as OAuth Clients](https:/
 scenario. This gives you the possibility of defining clients associated with
 service accounts. You just need to create the service account with the
 proper annotations:
-```
+
+```bash
 $ oc create -f - <<EOF
 apiVersion: v1
 kind: ServiceAccount
